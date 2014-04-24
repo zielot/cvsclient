@@ -112,7 +112,7 @@ public class SSHConnection extends AbstractConnection {
         this.connectionIdentity = connectionIdentity;
     }
 
-    public void open() throws AuthenticationException, CommandAbortedException {
+    public void openUsingPrivateKey() throws AuthenticationException, CommandAbortedException {
 
         Properties props = new Properties();
         props.put("StrictHostKeyChecking", "no"); // NOI18N
@@ -156,6 +156,45 @@ public class SSHConnection extends AbstractConnection {
         }
     }
 
+    public void open() throws AuthenticationException, CommandAbortedException {
+
+        Properties props = new Properties();
+        props.put("StrictHostKeyChecking", "no"); // NOI18N
+        // props.put("PreferredAuthentications", "publickey,password");
+        
+        
+        JSch jsch = new JSch();
+        try {
+             session = jsch.getSession(username, host, port);
+             session.setUserInfo(new SSHUserInfo());
+             String knownHostsFile = connectionIdentity.getKnownHostsFile();
+             String separator = System.getProperty("file.separator");
+ 
+             knownHostsFile = knownHostsFile.replace("/", separator).replace("\\", separator);             
+             jsch.setKnownHosts(knownHostsFile);
+ 
+             session.setSocketFactory(new SocketFactoryBridge(SocketFactory.getDefault()));
+             session.setConfig(props);
+             session.connect();
+         } catch (JSchException e) {
+            throw new AuthenticationException(e, "SSH connection failed.");
+        }
+        
+        try {
+            channel = (ChannelExec) session.openChannel("exec"); // NOI18N
+            channel.setCommand(CVS_SERVER_COMMAND);
+            setInputStream(new LoggedDataInputStream(new SshChannelInputStream(channel)));
+            setOutputStream(new LoggedDataOutputStream(channel.getOutputStream()));
+            channel.connect();
+        } catch (JSchException e) {
+            IOException ioe = new IOException("SSH connection failed.");
+            ioe.initCause(e);
+            throw new AuthenticationException(ioe, "Opening SSH channel failed.");
+        } catch (IOException e) {
+            throw new AuthenticationException(e, "Opening SSH channel failed.");
+        }
+    }
+    
     /**
      * Verifies that we can successfuly connect to the SSH server and run 'cvs server' command on it.
      * 
