@@ -1,4 +1,6 @@
-This is a patched version of the Netbeans CvsClient with changes to support the following:
+Modified version of Michael Clarke's patched cvsclient to require that Jsch ssh connection use a username and password by default instead of a SSH key. 
+
+Michael's patched version of the Netbeans CvsClient incorporated changes to support the following:
 1. Maven build (change project structure and added pom.xml)
 2. Add serialization (supports sending work to slaves for Jenkins builds)
 3. Synchronize DateFormat calls and shared variables (supports concurrent jobs using CVS)
@@ -9,7 +11,6 @@ notices in individual files for details.
 
 CvsClient makes use of the JSCH library to allow SSH communication for CVS ext connections. The
 JSCH library is released under a BSD style license:
-
 
 Copyright (c) 2002-2011 Atsuhiko Yamanaka, JCraft,Inc. 
 All rights reserved.
