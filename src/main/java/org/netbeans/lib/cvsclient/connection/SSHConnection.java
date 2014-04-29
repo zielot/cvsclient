@@ -129,8 +129,7 @@ public class SSHConnection extends AbstractConnection {
  
              knownHostsFile = knownHostsFile.replace("/", separator).replace("\\", separator);
              privateKeyPath = privateKeyPath.replace("/", separator).replace("\\", separator);
- 
-             
+
              jsch.setKnownHosts(knownHostsFile);
              jsch.addIdentity(privateKeyPath, connectionIdentity.getPrivateKeyPassword());
  
@@ -159,8 +158,8 @@ public class SSHConnection extends AbstractConnection {
     public void open() throws AuthenticationException, CommandAbortedException {
 
         Properties props = new Properties();
-        props.put("StrictHostKeyChecking", "no"); // NOI18N
-        // props.put("PreferredAuthentications", "publickey,password");
+        props.put("StrictHostKeyChecking", "no");
+        props.put("PreferredAuthentications", "password");
         
         
         JSch jsch = new JSch();
